@@ -1,3 +1,4 @@
+from copyreg import pickle
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -9,6 +10,9 @@ import tensorflow as tf
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, classification_report
+
+import os
+os.chdir("D:\Git\HandGestNotebook\DJI_Tello-Hand-Gesture-Recognition")
 
 class NeuralRecognition:
 
@@ -64,6 +68,12 @@ class NeuralRecognition:
             callbacks=[cp_callback, es_callback]
         )
 
+        history_DF = pd.DataFrame(self.history.history)
+
+        with open('keypoint_classifier/train_history.json', 'wb') as fileJSON:
+            history_DF.to_json(fileJSON)
+
+
     def getGestureName(self, fingerLandmark, w, h):
             x0_point = int(fingerLandmark[0].x * w)
             y0_point = int(fingerLandmark[0].y * h)
@@ -79,9 +89,10 @@ class NeuralRecognition:
             return self.gestureNameList[int(gesture)]
 
     def plot_model_acuracy(self):
+        self.get_saved_history()
         history = self.history
-        plt.plot(history.history['accuracy'])
-        plt.plot(history.history['val_accuracy'])
+        plt.plot(history['accuracy'])
+        plt.plot(history['val_accuracy'])
         plt.title('model accuracy')
         plt.ylabel('accuracy')
         plt.xlabel('epoch')
@@ -89,9 +100,10 @@ class NeuralRecognition:
         plt.show()
 
     def plot_model_loss(self):
+        self.get_saved_history()
         history = self.history
-        plt.plot(history.history['loss'])
-        plt.plot(history.history['val_loss'])
+        plt.plot(history['loss'])
+        plt.plot(history['val_loss'])
         plt.title('model loss')
         plt.ylabel('loss')
         plt.xlabel('epoch')
@@ -115,4 +127,8 @@ class NeuralRecognition:
         index = np.where(gesture==maxval)
         gestureid = index[0][0]
         return self.gestureNameList[int(gestureid)]
+
+    def get_saved_history(self):
+        self.history = pd.read_json('keypoint_classifier/train_history.json')
+        return self.history
 

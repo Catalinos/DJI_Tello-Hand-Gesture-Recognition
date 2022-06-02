@@ -6,6 +6,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
+import os
+os.chdir("D:\Git\HandGestNotebook\DJI_Tello-Hand-Gesture-Recognition")
+
 class ClassificatorRecognition:
 
     def __init__(self):
@@ -46,7 +49,8 @@ class ClassificatorRecognition:
 
     def doRandomTest(self):
         fortest = self.X_test.sample(1)
-        toValidate = self.y_test[fortest.index]
+        toValidate = self.y_test[fortest.index[0]]
+
         topredict = self.clf.predict(fortest)[0]
         print(topredict)
         print(toValidate)
