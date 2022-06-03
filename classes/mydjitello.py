@@ -22,6 +22,8 @@ class MyTelloControl:
         elif key == ord('f'):
             self.tello.move_down(30)
 
+    def take_off(self):
+        self.tello.takeoff()
 
     def gesture_control(self,gestureID):
 
@@ -34,12 +36,18 @@ class MyTelloControl:
         elif gestureID == 3:
             self.tello.move_right(30)
         elif gestureID == 4:
-            self.tello.move_up(30)
+            self.tello.send_rc_control(0,0,-30,0)
         elif gestureID == 5:
             self.tello.move_down(30)
         elif gestureID == 6:
             self.tello.rotate_clockwise(30)
         elif gestureID == 7:
             self.tello.rotate_counter_clockwise(30)
+        elif gestureID == 8:
+            self.tello.send_rc_control(0,0,30,0)
         elif gestureID == 9:
             self.tello.land()
+
+
+            # self.tello.send_rc_control(self.left_right_velocity, self.forw_back_velocity,
+            #                            self.up_down_velocity, self.yaw_velocity)
