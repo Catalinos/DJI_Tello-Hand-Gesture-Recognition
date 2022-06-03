@@ -81,7 +81,7 @@ class ClassificatorRecognition:
             dataFrame = pd.DataFrame([self.handData])
             
             gesture = self.clf.predict(dataFrame)[0]
-            return self.gestureNameList[int(gesture)]
+            return self.gestureNameList[int(gesture)], int(gesture)
 
     def getDataFrame(self):
         return self.handDF

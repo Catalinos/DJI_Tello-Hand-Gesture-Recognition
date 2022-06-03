@@ -74,19 +74,6 @@ class NeuralRecognition:
             history_DF.to_json(fileJSON)
 
 
-    def getGestureName(self, fingerLandmark, w, h):
-            x0_point = int(fingerLandmark[0].x * w)
-            y0_point = int(fingerLandmark[0].y * h)
-
-            to_predict = []
-            for i in range(0,21):
-                cx = int(fingerLandmark[i].x * w) / x0_point
-                cy = int(fingerLandmark[i].y * h) / y0_point
-                to_predict.append(cx)
-                to_predict.append(cy)
-            
-            gesture = self.model.predict(to_predict)[0]
-            return self.gestureNameList[int(gesture)]
 
     def plot_model_acuracy(self):
         self.get_saved_history()
@@ -110,8 +97,32 @@ class NeuralRecognition:
         plt.legend(['train', 'test'], loc='upper left')
         plt.show()
 
-    def load_saved_model(self, model_path):
-        self.model = tf.keras.models.load_model(model_path)
+    def plot_confusion_matrix(self, report=True):
+        self.load_saved_model()
+        y_true = self.y_testNeural
+        Y_pred = self.model.predict(self.X_testNeural)
+        y_pred = np.argmax(Y_pred, axis=1)
+        labels = sorted(list(set(y_true)))
+        cmx_data = confusion_matrix(y_true, y_pred, labels=labels)
+        
+        df_cmx = pd.DataFrame(cmx_data, index=labels, columns=labels)
+    
+        fig, ax = plt.subplots(figsize=(7, 6))
+        sns.heatmap(df_cmx, annot=True, fmt='g' ,square=False)
+        ax.set_ylim(len(set(y_true)), 0)
+        plt.show()
+        
+        if report:
+            print('Classification Report')
+            print(classification_report(self.y_testNeural, y_pred))
+
+# print_confusion_matrix(y_testNeural, y_pred)
+
+    def load_saved_model(self):
+        self.model = tf.keras.models.load_model(self.model_save_path)
+        X_dataset = np.loadtxt(self.dataset, delimiter=',', dtype='float32', usecols=list(range(2, (21 * 2) + 2)))
+        y_dataset = np.loadtxt(self.dataset, delimiter=',', dtype='int32', usecols=(1))
+        self.X_trainNeural, self.X_testNeural, self.y_trainNeural, self.y_testNeural = train_test_split(X_dataset, y_dataset, train_size=0.8, random_state=42)
 
     def getGestureName(self, fingerLandmark, w, h):
         x0_point = int(fingerLandmark[0].x * w)
@@ -126,9 +137,10 @@ class NeuralRecognition:
         maxval = max(gesture)
         index = np.where(gesture==maxval)
         gestureid = index[0][0]
-        return self.gestureNameList[int(gestureid)]
+        return self.gestureNameList[int(gestureid)], int(gestureid)
 
     def get_saved_history(self):
         self.history = pd.read_json('keypoint_classifier/train_history.json')
         return self.history
+
 
